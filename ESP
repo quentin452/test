@@ -10,7 +10,7 @@ local ESP = {
     TeamColor = true,
     Thickness = 2,
     AttachShift = 1,
-    TeamMates = true,
+    TeamMates = false,
     Players = true,
     
     Objects = setmetatable({}, {__mode="kv"}),
@@ -44,6 +44,15 @@ function ESP:GetTeam(p)
 	end
 	
 	return p and p.Team
+end
+
+function ESP:IsTeamMate(p)
+    local ov = self.Overrides.IsTeamMate
+	if ov then
+		return ov(p)
+    end
+    
+    return self:GetTeam(p) == self:GetTeam(plr)
 end
 
 function ESP:GetColor(obj)
@@ -147,6 +156,9 @@ function boxBase:Update()
 
     local allow = true
     if ESP.Overrides.UpdateAllow and not ESP.Overrides.UpdateAllow(self) then
+        allow = false
+    end
+    if self.Player and not ESP.TeamMates and ESP:IsTeamMate(self.Player) then
         allow = false
     end
     if self.Player and not ESP.Players then
